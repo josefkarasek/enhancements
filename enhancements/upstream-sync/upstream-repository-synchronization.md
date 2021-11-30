@@ -14,7 +14,6 @@ creation-date: "2021-11-30"
 last-updated: "2021-11-30"
 status: "provisional"
 tracking-link: https://issues.redhat.com/browse/CFE-184
-  - TBD
 see-also:
   # - "/enhancements/this-other-neat-thing.md"
 replaces:
@@ -23,59 +22,7 @@ superseded-by:
   # - "/enhancements/our-past-effort.md"
 ---
 
-Start by filling out this header template with metadata for this enhancement.
-
-* Enhancements should be related to work to be implemented in the near future.
-
-* Enhancements should have agreement from all stakeholders prior to merging.
-
-* `reviewers`: This can be anyone that has an interest in this work.
-
-* `approvers`: All enhancements must be approved, but the appropriate people to
-  approve a given enhancement depends on its scope.  If an enhancement is
-  limited in scope to a given team or component, then a peer or lead on that
-  team or pillar is an appropriate approver.  If an enhancement captures
-  something more broad in scope, then a member of the OpenShift architects team
-  or someone they delegate would be appropriate.  Examples would be something
-  that changes the definition of OpenShift in some way, adds a new required
-  dependency, or changes the way customers are supported.  Use your best
-  judgement to determine the level of approval needed.  If you’re not sure,
-  just leave it blank and ask for input during review.
-
 # Upstream Repository Resync
-
-This is the title of the enhancement. Keep it simple and descriptive. A good
-title can help communicate what the enhancement is and should be considered as
-part of any review.
-
-The YAML `title` should be lowercased and spaces/punctuation should be
-replaced with `-`.
-
-To get started with this template:
-1. **Pick a domain.** Find the appropriate domain to discuss your enhancement.
-1. **Make a copy of this template.** Copy this template into the directory for
-   the domain.
-1. **Fill out the "overview" sections.** This includes the Summary and
-   Motivation sections. These should be easy and explain why the community
-   should desire this enhancement.
-1. **Create a PR.** Assign it to folks with expertise in that domain to help
-   sponsor the process.
-1. **Merge at each milestone.** Merge when the design is able to transition to a
-   new status (provisional, implementable, implemented, etc.). View anything
-   marked as `provisional` as an idea worth exploring in the future, but not
-   accepted as ready to execute. Anything marked as `implementable` should
-   clearly communicate how an enhancement is coded up and delivered. If an
-   enhancement describes a new deployment topology or platform, include a
-   logical description for the deployment, and how it handles the unique aspects
-   of the platform. Aim for single topic PRs to keep discussions focused. If you
-   disagree with what is already in a document, open a new PR with suggested
-   changes.
-1. **Keep all required headers.** If a section does not apply to an
-   enhancement, explain why but do not remove the section. This part
-   of the process is enforced by the linter CI job.
-
-The `Metadata` section above is intended to support the creation of tooling
-around the enhancement process.
 
 ## Release Signoff Checklist
 
@@ -131,23 +78,24 @@ As the downstream repository maintainer, I would like to pick up a PR resulting 
 
 As the CI administrator, I need to deploy pre-packaged manifests to the openshift CI so that upstream resync is installed in a simple manner and can be used on openshift dowstream repositories.
 
-
 ### API Extensions
 
-This enhancement proposal aims to help maintainers to be more productive by enhancing
-existing CI infrastructure. It does not aim to be shipped outside of this scope.
+This enhancement proposal aims to help maintainers be more productive by enhancing
+existing CI infrastructure. CRDs and webhooks defined in this document are not meant
+to be shipped outside of this scope.
 
+CRDs and webhooks are described in detail below.
 
 ### Implementation Details/Notes/Constraints 
 
-Teams handle resynchronization activities in many different ways, depending on the legacy of the project, on the types of changes that need to be imported to the downstream (patches, new versions, etc). 
-It is therefore not possible to propose a single recipe for resyncrhonizing one repo with its upstream. 
+Teams handle synchronization activities in many different ways, depending on the legacy of the project, on the types of changes that need to be imported to the downstream (patches, new versions, etc) and other factors. 
+It is therefore not possible to propose a single recipe for syncrhonizing one repo with its upstream. 
 
-Rather, this proposal is to allow the team to:
-* watch for specific tags on the upstream repository,
-* and to define the recipe (plan), with specific steps, that would match this resynchronization use case. 
+Rather, this proposal aims to allow the team to:
+* watch for changes in upstream repositories,
+* and to define recipe (plan), with specific steps, that would match this synchronization use case. 
 
-Both of these elements (tags and plans) become Custom Resources that are used to run a resync-run in Openshift CI, which results in creating the Pull Request containing the resynchronization changes.
+Both of these elements (tags and plans) become Custom Resources that are used to run a sync-run in Openshift CI, which results in creating Pull Request containing the synchronization changes.
 
 ![Diagram](images/ur.png)
 
@@ -261,10 +209,7 @@ _TODO:_ bot's github credentials access scope
 
 ### Open Questions [optional]
 
-This is where to call out areas of the design that require closure before deciding
-to implement the design. 
- > 1. 
- > 2. 
+ > 1. Keeping track of sync jobs via pod status vs. dedicated CRD
 
 ### Test Plan
 
@@ -303,5 +248,4 @@ to implement the design.
 ## Infrastructure Needed [optional]
 
 * GitHub App setup
-* GitHub credentials consumption
-* OpenshiftCI cluster  
+* Openshift CI cluster  
