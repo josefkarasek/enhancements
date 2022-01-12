@@ -9,7 +9,7 @@ reviewers:
 approvers:
   - @decarr 
 creation-date: 2021-03-24
-last-updated: 2022-01-07
+last-updated: 2022-01-12
 status: implementable
 ---
 
@@ -47,11 +47,12 @@ Motivations include but are not limited to:
 
 ### Goals
 
-- the administrator or service (in the case of Managed OpenShift) installing OpenShift can pass an arbitrary
-   list of user-defined tags to the OpenShift Installer, and everything created by the installer and all other
+- the administrator or service (in the case of Managed OpenShift) installing OpenShift can pass a list of up to 25
+   user-defined tags ([tag restrictions](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html#tag-restrictions))
+   to the OpenShift Installer, and everything created by the installer and all other
    bootstrapped components will apply those tags to all resources created in AWS, for the life of the cluster, and where supported by AWS.
 - tags can be applied at creation time, in an atomic operation.
-- tags can be updated post creation.
+- tags can be updated post creation, if allowed by [AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html#tag-resources)
 
 ### Non-Goals
 
@@ -72,7 +73,7 @@ If `experimentalPropagateUserTags` is true, install validation will fail if ther
 Add a new field `resourceTags` to `.spec.aws` of the `infrastructure.config.openshift.io` type. Tags included in the
 `resourceTags` field will be applied to new resources created for the cluster. The `resourceTags` field will be populated by the installer only if the `experimentalPropagateUserTags` field is true.
 
-Note existing unchanged behavior: The installer will apply these tags to all AWS resources it creates with terraform (e.g. bootstrap and master EC2 instances) from the install config, not from infrastructure status, and regardless if the propagation option is set.
+Note existing unchanged behavior: The installer will apply these tags to all AWS resources it creates with terraform (e.g. bootstrap and master EC2 instances) from the install config, not from `infrastructure` resource, and regardless if the propagation option is set.
 
 All operators that create AWS resources (ingress, cloud credential, storage, image registry, machine-api)
 will apply these tags to all AWS resources they create.
@@ -85,9 +86,9 @@ Users can update the `resourceTags` by editing `.spec.aws` of the `infrastructur
 
 The precedence helps to maintain creator/updator tool (in-case of external tool usage) remains same for user-defined tags which are created correspondingly.
 
-The userTags field is intended to be set at install time and updatable (not allowed to delete). Components that respect this field must only ever add tags that they retrieve from this field to cloud resources, they must never remove tags from the existing underlying cloud resource even if the tags are removed from this field.
+The userTags field is intended to be set at install time and updatable (not allowed to delete). Components that respect this field must only ever add tags that they retrieve from this field to cloud resources, they must never remove tags from the existing underlying cloud resource.
 
-If the userTags field is changed post-install, there is no guarantee about how an in-cluster operator will respond to the change. Some operators may reconcile the change and change tags on the AWS resource. Some operators may ignore the change. However, if tags are removed from userTags, the tag will not be removed from the AWS resource.
+If the userTags field is changed post-install, there is no guarantee about how an in-cluster operator will respond to the change. Some operators may reconcile the change and change tags on the AWS resource. Some operators may ignore the change. However, removing tags from existing underlying cloud resource is not allowed.
 
 The infrastructure resource example to involve spec for api changes
 
@@ -138,6 +139,15 @@ properties:
                 minLength: 1
                 pattern: ^[0-9A-Za-z_.:/=+-@]+$
 ```
+
+Further, the `ResourceTags` field is protected by a validating webhook, which ensures that:
+* a tag is not being removed from the list
+* a tag key doesn't contain illegal prefix `aws` and `openshift`
+
+#### Reporting Status
+
+Components that respect the `resourceTags` field are advised to report last observed tags in their respective `.status` sub-resource,
+so that they can easily compare desired vs. actual tags and possibly skip unnecessary actions.
 
 ### User Stories
 
